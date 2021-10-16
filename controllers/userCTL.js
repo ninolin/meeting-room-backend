@@ -65,6 +65,15 @@ const userController = {
         console.log(err)
         return res.status(500).json(utilsTool.genResponse(err.detail))
     }
+  },
+  getUser: async (req, res) => {
+    try {
+        const user = await userDB.findAll({raw: true, attributes: {exclude: ['password', 'createdAt', 'updatedAt']}})
+        return res.json(utilsTool.genResponseWithData(user))
+    } catch(err) {
+        console.log(err)
+        return res.status(500).json(utilsTool.genResponse(err.detail))
+    }
   }
 }
 
