@@ -5,6 +5,7 @@ const userDB = db.user
 const userGroupCTL = require('../controllers/userGroupCTL.js')
 const userCTL = require('../controllers/userCTL.js')
 const meetingCTL = require('../controllers/meetingCTL.js')
+const meetingRoomCTL = require('../controllers/meetingRoomCTL.js')
 
 module.exports = (app) => {
   const authenticated = (req, res, next) => {
@@ -32,6 +33,7 @@ module.exports = (app) => {
   app.get('/user/:id', authenticated, userCTL.getUserById)
   app.get('/user', userCTL.getUser)
   app.get('/meeting', meetingCTL.getMeeting)
+  app.get('/meeting_room', meetingRoomCTL.getMeetingRoom)
   app.get('/user_group', authenticated, userGroupCTL.getUserGroup)
   app.post('/user_group', authenticated, userGroupCTL.addUserGroup)
   app.put('/user_group/:id', authenticated, userGroupCTL.updateUserGroup)

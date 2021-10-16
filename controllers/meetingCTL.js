@@ -3,7 +3,7 @@ const Mock = require('mockjs')
 const meetingController = {
   getMeeting: async (req, res) => {
     try {
-        const meetings = Mock.mock({
+        const data = Mock.mock({
           'items|10': [{
             id: '@id',
             'name': '@name()',
@@ -37,7 +37,7 @@ const meetingController = {
             'last_update_time': '@datetime'
           }]
         })
-        return res.json(utilsTool.genResponseWithListData(meetings))
+        return res.json(utilsTool.genResponseWithListData(data.items))
     } catch(err) {
         return res.status(500).json(utilsTool.genResponse(err.detail))
     }
