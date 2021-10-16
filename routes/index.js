@@ -8,7 +8,7 @@ const userCTL = require('../controllers/userCTL.js')
 module.exports = (app) => {
   const authenticated = (req, res, next) => {
     try {
-      const token = req.header('Authorization').replace('Bearar ', '')
+      const token = req.header('Authorization').replace('Bearer ', '')
       jwt.verify(token, 'helloAA', async (err, decoded) => {
         if (err) {
           return res.status(401).json(utilsTool.genResponse('authenticate failed'))
