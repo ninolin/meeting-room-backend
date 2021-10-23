@@ -8,7 +8,7 @@ const usesrGroupController = {
         const user_groups = await userGroupDB.findAll({raw: true})
         return res.json(utilsTool.genResponseWithListData(user_groups))
     } catch(err) {
-        return res.status(500).json(utilsTool.genResponse(err.detail))
+        return res.status(500).json(utilsTool.genErrorResponse(err))
     }
   },
   addUserGroup: async (req, res) => {
@@ -16,28 +16,34 @@ const usesrGroupController = {
         await userGroupDB.create({name: req.body.name, description: req.body.description})
         return res.json(utilsTool.genResponse())
     } catch(err) {
-        return res.status(500).json(utilsTool.genResponse(err.detail))
+        return res.status(500).json(utilsTool.genErrorResponse(err))
     }
   },
   updateUserGroup: async (req, res) => {
     try {
         const user_group = await userGroupDB.findByPk(req.params.id)
-        if(!user_group) return res.status(500).json(utilsTool.genResponse('data not foud'))
+        if(!user_group) throw Error ('data not found')
 
         await userGroupDB.update({name: req.body.name, description: req.body.description}, {where: {id: req.params.id}})
         return res.json(utilsTool.genResponse())
     } catch(err) {
-        return res.status(500).json(utilsTool.genResponse(err.detail))
+        return res.status(500).json(utilsTool.genErrorResponse(err))
     }
   },
   deleteUserGroup: async (req, res) => {
     try {
         const user_group = await userGroupDB.findByPk(req.params.id)
-        if(!user_group) return res.status(500).json(utilsTool.genResponse('data not foud'))
-        user_group.destroy()
+        if(!user_group) throw Error ('data not found')
+
+        await userGroupDB.update({
+          disabled: true
+        }, { 
+          where: {id: req.params.id} 
+        })
+
         return res.json(utilsTool.genResponse())
     } catch(err) {
-        return res.status(500).json(utilsTool.genResponse(err.detail))
+        return res.status(500).json(utilsTool.genErrorResponse(err))
     }
   }
 }

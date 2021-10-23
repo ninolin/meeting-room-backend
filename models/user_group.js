@@ -11,11 +11,17 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      user_group.belongsToMany(models.user, {
+        through: models.user_group_relationship,
+        foreignKey: 'UserGroupId',
+        as: 'user'
+      })
     }
   };
   user_group.init({
     name: DataTypes.STRING,
-    description: DataTypes.TEXT
+    description: DataTypes.TEXT,
+    disabled: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'user_group',

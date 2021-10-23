@@ -1,7 +1,7 @@
 'use strict';
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('user_group_relationships', {
+    await queryInterface.createTable('user_role_relationships', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -12,7 +12,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER
       },
-      UserGroupId: {
+      UserRoleId: {
         allowNull: false,
         type: Sequelize.INTEGER
       },
@@ -27,6 +27,6 @@ module.exports = {
     });
   },
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('user_group_relationships');
+    await queryInterface.dropTable('user_role_relationships');
   }
 };

@@ -15,6 +15,10 @@ const utilsTool = {
   genResponse: (msg='successs') => {
     return { message: msg }
   },
+  genErrorResponse: (error) => {
+    console.log(error)
+    return { message: error.stack.split("\n")[0] }
+  },
 }
 
 module.exports = utilsTool

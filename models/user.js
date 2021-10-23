@@ -16,6 +16,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'UserId',
         as: 'user_group'
       })
+      user.belongsToMany(models.user_role, {
+        through: models.user_role_relationship,
+        foreignKey: 'UserId',
+        as: 'user_role'
+      })
     }
   };
   user.init({
@@ -24,7 +29,8 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     email: DataTypes.STRING,
     phone: DataTypes.STRING,
-    permission: DataTypes.STRING
+    permission: DataTypes.STRING,
+    disabled: DataTypes.BOOLEAN
   }, {
     sequelize,
     modelName: 'user',
