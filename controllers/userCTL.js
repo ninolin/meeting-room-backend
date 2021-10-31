@@ -38,7 +38,7 @@ const userController = {
         name: user.name, 
         email: user.email, 
         phone: user.phone, 
-        permission: user.user_permission
+        permission: user.permission
       }
       var token = jwt.sign(payload, 'helloAA')
       return res.json(utilsTool.genResponseWithData({token}))
@@ -74,7 +74,7 @@ const userController = {
   getUser: async (req, res) => {
     try {
         const user = await userDB.findAll({raw: true, attributes: {exclude: ['password', 'createdAt', 'updatedAt']}})
-        return res.json(utilsTool.genResponseWithData(user))
+        return res.json(utilsTool.genResponseWithListData(user))
     } catch(err) {
         return res.status(500).json(utilsTool.genErrorResponse(err))
     }

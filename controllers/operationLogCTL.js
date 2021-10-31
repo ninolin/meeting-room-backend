@@ -1,20 +1,21 @@
 const utilsTool = require('../utilsTool.js')
-const Mock = require('mockjs')
+const db = require('../models') 
+const operationLogDB = db.operation_log
+const userDB = db.user
 const operationLogController = {
   getOperationLog: async (req, res) => {
     try {
-      const data = Mock.mock({
-        'items|10': [{
-          id: '@id',
-          'user': '@name()',
-          'item|1': ['meeting', 'meeting_room', 'user', 'setting'],
-          'name': '@name()',
-          'action|1': ['create', 'update', 'delete'],
-          'summary': '@word(5, 10)',
-          'create_time': '@datetime'
-        }]
+      const operationLog = await operationLogDB.findAll({
+        attributes: {exclude: ['UserId', 'userId']},
+        include: [
+          { 
+            model: userDB, 
+            attributes: {exclude: ['password']}
+          }
+        ]
       })
-      return res.json(utilsTool.genResponseWithData(data.items))
+      if(!operationLog) throw Error ('data not found')
+      return res.json(utilsTool.genResponseWithListData(operationLog))
     } catch(err) {
         return res.status(500).json(utilsTool.genResponse(err.detail))
     }

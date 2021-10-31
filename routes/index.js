@@ -1,3 +1,4 @@
+const path = require('path')
 const utilsTool = require('../utilsTool.js')
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
@@ -57,8 +58,15 @@ module.exports = (app) => {
   app.post('/meeting', authenticated, upload.array('file', 10), meetingCTL.addMeeting)
   app.put('/meeting/:id', authenticated, upload.array('file', 10), meetingCTL.updateMeeting)
   app.delete('/meeting/:id', authenticated, meetingCTL.deleteMeeting)
+  app.get('/meeting/minute/:id', authenticated, meetingCTL.getMeetingMinute)
   app.put('/meeting/minute/:id', authenticated, meetingCTL.updateMeetingMinute)
   app.post('/meeting/minute/file/:id', authenticated, upload.single('file'), meetingCTL.addMeetingMinuteFile)
 
   app.get('/operation_log', authenticated, operationLogCTL.getOperationLog)
+  app.get('/download/:filename', authenticated, function(req, res){
+
+    const file = `./upload/${req.params.filename}`;
+    res.download(file); // Set disposition and send it.
+    // res.sendFile(path.resolve('upload/Case_Study_Nathan_Chu.pdf'));
+  });
 }

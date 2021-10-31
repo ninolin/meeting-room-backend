@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { Op } = require("sequelize");
 const utilsTool = require('../utilsTool.js')
 const db = require('../models') 
 const meetingDB = db.meeting
@@ -34,7 +35,7 @@ const meetingController = {
           ]
         })
         if(!meeting) throw Error ('data not found')
-        return res.json(utilsTool.genResponseWithData(meeting))
+        return res.json(utilsTool.genResponseWithListData(meeting))
     } catch(err) {
         return res.status(500).json(utilsTool.genErrorResponse(err))
     }
@@ -52,11 +53,11 @@ const meetingController = {
         }, { transaction })
 
         if(req.body.participants) {
-          const meetingUserRelationship = req.body.participants.map(item => {
-            if(item.type === 'group') {
-              return {'MeetingId': new_meeting.id, 'UserGroupId': item.id}
+          const meetingUserRelationship = req.body.participants.split(',').map(item => {
+            if(item.split('.')[1] === 'group') {
+              return {'MeetingId': new_meeting.id, 'UserGroupId': item.split('.')[0]}
             } else {
-              return {'MeetingId': new_meeting.id, 'UserId': item.id}
+              return {'MeetingId': new_meeting.id, 'UserId': item.split('.')[0]}
             }
           })
           if(meetingUserRelationship.length > 0) {
@@ -102,17 +103,17 @@ const meetingController = {
         }, 
         { where: {id: req.params.id} },
         { transaction })
-
+        
         if(req.body.participants) {
           await meetingUserRelationshipDB.destroy({
             where: { MeetingId: req.params.id }
           }, { transaction });
 
-          const meetingUserRelationship = req.body.participants.map(item => {
-            if(item.type === 'group') {
-              return {'MeetingId': req.params.id, 'UserGroupId': item.id}
+          const meetingUserRelationship = req.body.participants.split(',').map(item => {
+            if(item.split('.')[1] === 'group') {
+              return {'MeetingId': req.params.id, 'UserGroupId': item.split('.')[0]}
             } else {
-              return {'MeetingId': req.params.id, 'UserId': item.id}
+              return {'MeetingId': req.params.id, 'UserId': item.split('.')[0]}
             }
           })
           if(meetingUserRelationship.length > 0) {
@@ -120,19 +121,29 @@ const meetingController = {
           }
         }
 
-        if(req.body.delete_files) {
-          const delete_files = req.body.delete_files.split(",")
-          for (const file_id of delete_files) {
+        if(req.body.meeting_files) {
+          const delete_files = await meetingFileDB.findAll({
+            where: { 
+              MeetingId: req.params.id, 
+              type: 'meeting', 
+              id: {
+                [Op.notIn]: req.body.meeting_files.split(",")
+              }
+            }
+          })
+          console.log('delete_files', delete_files)
+          delete_files.forEach(async (file) => {
             await meetingFileDB.destroy({
               where: { 
                 MeetingId: req.params.id, 
                 type: 'meeting', 
-                id: file_id
+                id: file.id
               }
-            }, { transaction });
-          }
+            });
+          })
         }
 
+        // TODO: 技術債:讀檔&寫檔要改成非同步，讓寫入meeting_file table加上traction
         const { files } = req
         if (files) {
           files.forEach(file => {
@@ -182,11 +193,42 @@ const meetingController = {
         return res.status(500).json(utilsTool.genErrorResponse(err))
     }
   },
+  getMeetingMinute: async (req, res) => {
+    try {
+        const meeting = await meetingDB.findOne({
+          attributes: {exclude: ['MeetingRoomId', 'meetingRoomId']},
+          include: [
+            meetingRoomDB,
+            { 
+              model: meetingFileDB, 
+              attributes: {exclude: ['MeetingId', 'meetingId']}
+            },
+            { 
+              model: userDB, 
+              as: 'participant_user',
+              attributes:['id','account','name','email','phone'], 
+              through: { attributes: [] } 
+            },
+            { 
+              model: userGroupDB, 
+              as: 'participant_group',
+              attributes:['id','name'], 
+              through: { attributes: [] } 
+            }
+          ],
+          where: { id: req.params.id }
+        })
+        if(!meeting) throw Error ('data not found')
+        return res.json(utilsTool.genResponseWithData(meeting))
+    } catch(err) {
+        return res.status(500).json(utilsTool.genErrorResponse(err))
+    }
+  },
   updateMeetingMinute: async (req, res) => {
     try {
         const meeting = await meetingDB.findByPk(req.params.id)
         if(!meeting) throw Error ('data not found')
-
+        console.log(req.body)
         await meetingDB.update({
           meeting_minute: req.body.meeting_minute
         }, {where: {id: req.params.id}})
