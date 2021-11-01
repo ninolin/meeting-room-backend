@@ -5,7 +5,7 @@ const meetingRoomDB = db.meeting_room
 const meetingRoomController = {
   getMeetingRoom: async (req, res) => {
     try {
-        const meeting_rooms = await meetingRoomDB.findAll({raw: true})
+        const meeting_rooms = await meetingRoomDB.findAll({where: {disabled: false}})
         return res.json(utilsTool.genResponseWithListData(meeting_rooms))
     } catch(err) {
         return res.status(500).json(utilsTool.genResponse(err.detail))

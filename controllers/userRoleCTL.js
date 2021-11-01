@@ -6,8 +6,7 @@ const operationLogDB = db.operation_log
 const userRoleController = {
   getUserRole: async (req, res) => {
     try {
-        console.log('user', req.user.id)
-        const user_roles = await userRoleDB.findAll({raw: true})
+        const user_roles = await userRoleDB.findAll({where: {disabled: false}})
         return res.json(utilsTool.genResponseWithListData(user_roles))
     } catch(err) {
         return res.status(500).json(utilsTool.genErrorResponse(err))

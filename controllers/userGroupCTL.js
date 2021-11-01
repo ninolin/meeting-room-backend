@@ -5,7 +5,7 @@ const userGroupDB = db.user_group
 const usesrGroupController = {
   getUserGroup: async (req, res) => {
     try {
-        const user_groups = await userGroupDB.findAll({raw: true})
+        const user_groups = await userGroupDB.findAll({where: {disabled: false}})
         return res.json(utilsTool.genResponseWithListData(user_groups))
     } catch(err) {
         return res.status(500).json(utilsTool.genErrorResponse(err))

@@ -73,7 +73,23 @@ const userController = {
   },
   getUser: async (req, res) => {
     try {
-        const user = await userDB.findAll({raw: true, attributes: {exclude: ['password', 'createdAt', 'updatedAt']}})
+        const user = await userDB.findAll({
+          attributes: {exclude: ['password', 'createdAt', 'updatedAt']},
+          include: [
+            { 
+              model: userGroupDB, 
+              as: 'user_group', 
+              attributes:['id','name','description'], 
+              through: { attributes: [] } 
+            },
+            { 
+              model: userRoleDB, 
+              as: 'user_role', 
+              attributes:['id','name','description'], 
+              through: { attributes: [] } 
+            }
+          ]
+        })
         return res.json(utilsTool.genResponseWithListData(user))
     } catch(err) {
         return res.status(500).json(utilsTool.genErrorResponse(err))
@@ -82,14 +98,14 @@ const userController = {
   updateUser: async (req, res) => {
     const transaction = await db.sequelize.transaction();  
     try {
+
         const user = await userDB.findByPk(req.params.id)
         if(!user) throw Error ('data not found')
-        
-        const ug = await userGroupDB.findAll({ where: { id: req.body.user_group } })
-        if(ug.length !== req.body.user_group.length) throw Error ('user group not found')
 
-        const ur = await userRoleDB.findAll({ where: { id: req.body.user_role } })
-        if(ur.length !== req.body.user_role.length) throw Error ('user role not found')
+        const ug = await userGroupDB.findAll({ where: { id: req.body.group }})
+        if(ug.length !== req.body.group.length) throw Error ('user group not found')
+        const ur = await userRoleDB.findAll({ where: { id: req.body.role } })
+        if(ur.length !== req.body.role.length) throw Error ('user role not found')
 
         await userDB.update({
           name: req.body.name, 
@@ -103,7 +119,7 @@ const userController = {
         await userGroupRelationshipDB.destroy({
           where: { UserId: req.params.id }
         }, { transaction });
-        const userGroupRelationship = req.body.user_group.map(item => {
+        const userGroupRelationship = req.body.group.map(item => {
           return {'UserId': req.params.id, 'UserGroupId': item}
         })
         if(userGroupRelationship.length > 0) {
@@ -114,7 +130,7 @@ const userController = {
         await userRoleRelationshipDB.destroy({
           where: { UserId: req.params.id }
         }, { transaction });
-        const userRoleRelationship = req.body.user_role.map(item => {
+        const userRoleRelationship = req.body.role.map(item => {
           return {'UserId': req.params.id, 'UserRoleId': item}
         })
         if(userRoleRelationship.length > 0) {

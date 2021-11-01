@@ -11,6 +11,7 @@ const userRoleCTL = require('../controllers/userRoleCTL.js')
 const meetingCTL = require('../controllers/meetingCTL.js')
 const meetingRoomCTL = require('../controllers/meetingRoomCTL.js')
 const operationLogCTL = require('../controllers/operationLogCTL.js')
+const settingCTL = require('../controllers/settingCTL.js')
 
 module.exports = (app) => {
   const authenticated = (req, res, next) => {
@@ -63,6 +64,8 @@ module.exports = (app) => {
   app.post('/meeting/minute/file/:id', authenticated, upload.single('file'), meetingCTL.addMeetingMinuteFile)
 
   app.get('/operation_log', authenticated, operationLogCTL.getOperationLog)
+  app.get('/setting', authenticated, settingCTL.getSetting)
+  app.put('/setting', authenticated, settingCTL.updateSetting)
   app.get('/download/:filename', authenticated, function(req, res){
 
     const file = `./upload/${req.params.filename}`;
